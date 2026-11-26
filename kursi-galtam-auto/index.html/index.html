@@ -1,0 +1,1566 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KURSI GALTAM</title>
+<style>
+  :root {
+    --bg-main: #0f1522;
+    --bg-card: #151d2e;
+    --bg-input: #0d121d;
+    --tbl-bg-1: #f5f8fc;
+    --tbl-bg-2: #edf2f8;
+    --tbl-hover: #e2ecf7;
+    --tbl-border: rgba(44, 78, 124, 0.14);
+    --tbl-text: #1c2b42;
+    --tbl-muted: #687891;
+    --border-soft: rgba(125, 165, 218, 0.18);
+    --border-cyan: rgba(75, 180, 230, 0.45);
+    --border-pink: rgba(224, 88, 148, 0.45);
+    --text-main: #eef3fa;
+    --text-muted: #98a8c2;
+    --logo-cyan: #57c1ef;
+    --logo-cyan-dark: #1d7ca8;
+    --logo-cyan-bg: rgba(87, 193, 239, 0.15);
+    --logo-pink: #eb6ca3;
+    --logo-pink-dark: #b83b74;
+    --logo-pink-bg: rgba(235, 108, 163, 0.16);
+    --soft-mint: #6ee7b7;
+    --soft-mint-dark: #167c56;
+    --soft-mint-bg: rgba(110, 231, 183, 0.16);
+    --soft-rose: #f472b6;
+    --soft-rose-dark: #a82c68;
+    --soft-rose-bg: rgba(244, 114, 182, 0.16);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Inter, Arial, sans-serif; }
+  body { background: var(--bg-main); color: var(--text-main); padding: 10px 12px; font-size: 11.5px; line-height: 1.4; }
+  .wrap { width: 100%; max-width: 1280px; margin: 0 auto; }
+
+  /* TOAST POP-UP + SPARKLE CONFETTI */
+  .toast-wrap {
+    position: fixed; top: 16px; left: 50%; transform: translateX(-50%);
+    z-index: 260; pointer-events: none; display: flex; flex-direction: column; gap: 6px; align-items: center;
+  }
+  .toast-box {
+    position: relative;
+    background: linear-gradient(135deg, rgba(23, 33, 53, 0.98), rgba(33, 25, 50, 0.98));
+    border: 1.5px solid var(--logo-cyan);
+    border-radius: 14px;
+    padding: 10px 18px;
+    box-shadow: 0 14px 34px rgba(7, 11, 20, 0.65), 0 0 22px rgba(87, 193, 239, 0.25);
+    display: flex; align-items: center; gap: 10px;
+    opacity: 0; transform: translateY(-14px) scale(0.92);
+    transition: opacity 0.22s cubic-bezier(0.22, 1, 0.36, 1), transform 0.32s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .toast-box.show { opacity: 1; transform: translateY(0) scale(1); }
+  .toast-box.full-toast {
+    border-color: var(--logo-pink);
+    background: linear-gradient(135deg, rgba(24, 41, 66, 0.99), rgba(56, 27, 62, 0.99));
+    box-shadow: 0 16px 38px rgba(7, 11, 20, 0.72), 0 0 28px rgba(235, 108, 163, 0.42);
+  }
+  .toast-tag {
+    font-size: 10px; font-weight: 800; padding: 2px 9px; border-radius: 999px;
+    background: linear-gradient(135deg, rgba(87, 193, 239, 0.28), rgba(235, 108, 163, 0.28));
+    color: var(--logo-cyan); letter-spacing: 0.5px;
+    border: 1px solid var(--border-cyan);
+  }
+  .toast-box.full-toast .toast-tag {
+    color: #ffd6ea;
+    border-color: rgba(235, 108, 163, 0.65);
+    background: linear-gradient(135deg, rgba(235, 108, 163, 0.38), rgba(87, 193, 239, 0.32));
+  }
+  .toast-msg { font-size: 13px; font-weight: 800; color: var(--text-main); white-space: nowrap; }
+
+  .sparkle-layer {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    pointer-events: none; z-index: 255; overflow: hidden;
+  }
+  @keyframes confettiFall {
+    0% {
+      opacity: 1;
+      transform: translate3d(0, 0, 0) rotate(0deg) scale(0.65);
+    }
+    25% {
+      opacity: 1;
+      transform: translate3d(var(--dx-mid, 14px), 26px, 0) rotate(130deg) scale(1.12);
+    }
+    100% {
+      opacity: 0;
+      transform: translate3d(var(--dx-end, -22px), var(--dy-end, 125px), 0) rotate(360deg) scale(0.75);
+    }
+  }
+  .sparkle-piece {
+    position: absolute;
+    width: 8px; height: 8px;
+    border-radius: 2px;
+    animation: confettiFall var(--dur, 1.05s) cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  }
+
+  /* BANNER KURSI FULL */
+  @keyframes fullBannerPulse {
+    0%, 100% {
+      box-shadow: 0 0 18px rgba(87, 193, 239, 0.25), 0 0 24px rgba(235, 108, 163, 0.22);
+    }
+    50% {
+      box-shadow: 0 0 26px rgba(87, 193, 239, 0.45), 0 0 34px rgba(235, 108, 163, 0.42);
+    }
+  }
+  @keyframes fullBannerSweep {
+    0% { left: -55%; }
+    100% { left: 125%; }
+  }
+  .full-banner {
+    display: none;
+    position: relative;
+    overflow: hidden;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    flex-wrap: wrap;
+    padding: 8px 14px;
+    margin-bottom: 8px;
+    border-radius: 12px;
+    background: linear-gradient(95deg, rgba(27, 68, 108, 0.94), rgba(76, 36, 86, 0.94), rgba(29, 86, 118, 0.94));
+    border: 1.5px solid rgba(235, 108, 163, 0.65);
+    animation: fullBannerPulse 2.1s ease-in-out infinite;
+  }
+  .full-banner.active { display: flex; }
+  .full-banner::after {
+    content: "";
+    position: absolute; top: 0; bottom: 0; width: 34%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.24), transparent);
+    transform: skewX(-20deg);
+    animation: fullBannerSweep 2.6s ease-in-out infinite;
+    pointer-events: none;
+  }
+  .full-banner-left { display: flex; align-items: center; gap: 9px; position: relative; z-index: 1; }
+  .full-pill {
+    background: linear-gradient(135deg, #57c1ef, #eb6ca3);
+    color: #0b111c;
+    font-weight: 900;
+    font-size: 10px;
+    letter-spacing: 0.6px;
+    padding: 3px 9px;
+    border-radius: 999px;
+  }
+  .full-banner-text { font-size: 12px; font-weight: 800; color: #ffffff; letter-spacing: 0.2px; }
+  .full-banner-sub { font-size: 11px; color: #dbeafe; font-weight: 600; position: relative; z-index: 1; }
+
+  /* HEADER */
+  .top-bar {
+    position: relative;
+    display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px;
+    background: linear-gradient(135deg, #172135 0%, #161d2f 55%, #201a30 100%);
+    border: 1px solid var(--border-soft);
+    border-radius: 14px;
+    padding: 11px 16px;
+    margin-bottom: 8px;
+    overflow: hidden;
+  }
+  .top-bar::before {
+    content: "";
+    position: absolute; top: 0; left: 0; right: 0; height: 2.5px;
+    background: linear-gradient(90deg, #57c1ef, #4d79bd, #e05894, #57c1ef);
+    background-size: 200% 100%;
+    animation: topBarSlide 5s linear infinite;
+  }
+  @keyframes topBarSlide {
+    0% { background-position: 0% 50%; }
+    100% { background-position: 200% 50%; }
+  }
+
+  .top-left { display: flex; flex-direction: column; gap: 7px; }
+  .brand-title { font-size: 20px; font-weight: 800; color: var(--text-main); letter-spacing: 0.4px; line-height: 1.15; }
+  .brand-title .c-cyan { color: var(--logo-cyan); }
+  .brand-title .c-pink { color: var(--logo-pink); }
+
+  .pills { display: flex; flex-wrap: wrap; gap: 7px; align-items: center; }
+  .pill {
+    background: rgba(13, 18, 29, 0.78); border: 1px solid var(--border-soft);
+    padding: 4px 11px; border-radius: 999px; font-weight: 700; font-size: 12px; color: var(--text-muted);
+  }
+  .pill-htm {
+    border-color: var(--border-cyan); color: var(--logo-cyan); background: var(--logo-cyan-bg);
+  }
+
+  /* STATISTIK KANAN */
+  .right-stats { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+  .mini-stat {
+    background: rgba(13, 18, 29, 0.85); border: 1px solid var(--border-cyan);
+    border-radius: 11px; padding: 6px 14px; text-align: center; min-width: 88px; height: 56px;
+    display: flex; flex-direction: column; justify-content: center;
+    transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.25s ease, border-color 0.25s ease;
+  }
+  .mini-stat.bump {
+    transform: scale(1.08);
+    box-shadow: 0 0 18px rgba(87, 193, 239, 0.35);
+  }
+  .mini-stat.is-full {
+    border-color: var(--logo-pink);
+    box-shadow: 0 0 16px rgba(235, 108, 163, 0.28);
+  }
+  .mini-stat small { color: var(--text-muted); font-size: 10px; font-weight: 700; display: block; letter-spacing: 0.4px; }
+  .mini-stat strong { font-size: 17px; font-weight: 800; color: var(--logo-cyan); line-height: 1.2; }
+  .mini-stat.pink { border-color: var(--border-pink); }
+  .mini-stat.pink strong { color: var(--logo-pink); }
+  .mini-stat.pink.bump {
+    box-shadow: 0 0 18px rgba(235, 108, 163, 0.35);
+  }
+
+  /* PENGATURAN & FILTER BAR */
+  .cfg-bar {
+    display: flex; flex-wrap: wrap; gap: 6px; align-items: center;
+    background: var(--bg-card); border: 1px solid var(--border-soft);
+    border-radius: 10px; padding: 7px 11px; margin-bottom: 8px;
+  }
+  .cfg-bar label { color: var(--text-muted); font-size: 11px; font-weight: 600; }
+
+  input, button {
+    background: var(--bg-input); color: var(--text-main);
+    border: 1px solid var(--border-soft); border-radius: 7px;
+    padding: 4px 8px; font-size: 11px; outline: none; transition: all 0.16s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  input:focus { border-color: var(--border-cyan); }
+  button { cursor: pointer; font-weight: 700; }
+  button:hover:not(:disabled) { transform: translateY(-1px); filter: brightness(1.08); }
+  button:active:not(:disabled) { transform: scale(0.93); filter: brightness(0.96); }
+  button:disabled { opacity: 0.38; cursor: not-allowed; }
+
+  .b-cyan { background: var(--logo-cyan-bg); color: var(--logo-cyan); border: 1px solid var(--border-cyan); }
+  .b-pink { background: var(--logo-pink-bg); color: var(--logo-pink); border: 1px solid var(--border-pink); }
+  .b-grad {
+    background: linear-gradient(135deg, rgba(87, 193, 239, 0.24), rgba(235, 108, 163, 0.24));
+    color: var(--text-main); border: 1px solid rgba(130, 175, 235, 0.45);
+  }
+  .b-soft { background: rgba(148, 163, 184, 0.12); color: var(--text-main); border: 1px solid var(--border-soft); }
+  .b-soft.active-filter {
+    background: var(--logo-cyan-bg); color: var(--logo-cyan); border-color: var(--border-cyan);
+  }
+
+  /* PANEL TABEL PUTIH KEABU-ABUAN */
+  .list-panel {
+    background: var(--tbl-bg-1);
+    color: var(--tbl-text);
+    border: 1px solid rgba(87, 193, 239, 0.4);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 10px 26px rgba(6, 10, 18, 0.35);
+    transition: border-color 0.25s ease, box-shadow 0.25s ease;
+  }
+  .list-panel.all-full {
+    border-color: rgba(235, 108, 163, 0.75);
+    box-shadow: 0 12px 32px rgba(6, 10, 18, 0.42), 0 0 24px rgba(235, 108, 163, 0.22);
+  }
+  .list-head {
+    display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px;
+    padding: 8px 12px;
+    background: linear-gradient(90deg, #e8eff8 0%, #f1eaf5 100%);
+    border-bottom: 1px solid var(--tbl-border);
+  }
+  .list-head-left { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+  .list-head h2 { font-size: 12px; font-weight: 800; color: var(--logo-cyan-dark); letter-spacing: 0.3px; }
+  .filter-group { display: flex; gap: 4px; align-items: center; }
+
+  .list-panel .b-soft {
+    background: #ffffff; color: var(--tbl-text); border: 1px solid var(--tbl-border);
+  }
+  .list-panel .b-soft.active-filter {
+    background: rgba(29, 124, 168, 0.14); color: var(--logo-cyan-dark); border-color: rgba(29, 124, 168, 0.45);
+  }
+  .list-panel .b-cyan {
+    background: rgba(29, 124, 168, 0.13); color: var(--logo-cyan-dark); border: 1px solid rgba(29, 124, 168, 0.36);
+  }
+  .list-panel .b-pink {
+    background: rgba(184, 59, 116, 0.13); color: var(--logo-pink-dark); border: 1px solid rgba(184, 59, 116, 0.36);
+  }
+  .list-panel .b-grad {
+    background: linear-gradient(135deg, rgba(29, 124, 168, 0.14), rgba(184, 59, 116, 0.14));
+    color: var(--tbl-text); border: 1px solid rgba(44, 78, 124, 0.28);
+  }
+
+  .search-in {
+    width: 145px; padding: 3px 9px; font-size: 11px; border-radius: 999px;
+    background: #ffffff; color: var(--tbl-text); border: 1px solid var(--tbl-border);
+  }
+  .search-in:focus { border-color: var(--logo-cyan-dark); }
+
+  .sum-pills { display: flex; flex-wrap: wrap; gap: 5px; align-items: center; font-size: 10.5px; font-weight: 700; }
+  .sum-pills span {
+    background: #ffffff; padding: 3px 8px; border-radius: 999px;
+    border: 1px solid var(--tbl-border); color: var(--tbl-muted);
+  }
+
+  .two-col-grid { display: grid; grid-template-columns: 1fr 1fr; }
+  .col-box:first-child { border-right: 1px solid var(--tbl-border); }
+
+  @media (max-width: 980px) {
+    .two-col-grid { grid-template-columns: 1fr; }
+    .col-box:first-child { border-right: none; }
+  }
+
+  /* EFEK TERUS-TERUSAN GAYA BANNER FULL UNTUK SEMUA KURSI TERISI */
+  @keyframes regRowGlowLoop {
+    0%, 100% {
+      box-shadow: inset 0 0 0 1px rgba(235, 108, 163, 0.58), inset 0 0 14px rgba(87, 193, 239, 0.18);
+    }
+    50% {
+      box-shadow: inset 0 0 0 1.4px rgba(87, 193, 239, 0.72), inset 0 0 20px rgba(235, 108, 163, 0.28);
+    }
+  }
+
+  @keyframes regRowShimmerLoop {
+    0% { left: -55%; }
+    100% { left: 130%; }
+  }
+
+  .seat-row {
+    position: relative;
+    overflow: hidden;
+    display: grid;
+    grid-template-columns: 24px minmax(74px, 98px) minmax(74px, 98px) minmax(82px, 1fr) 44px 38px 44px auto;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 8px;
+    background: var(--tbl-bg-1);
+    border-bottom: 1px solid var(--tbl-border);
+    transition: background-color 0.25s ease;
+  }
+  .seat-row:nth-child(even) { background: var(--tbl-bg-2); }
+  .seat-row:hover { background: var(--tbl-hover); }
+
+  .seat-row.registered {
+    background: linear-gradient(95deg, #1b446c 0%, #4c2456 52%, #1d5676 100%);
+    border-bottom: 1px solid rgba(235, 108, 163, 0.42);
+    color: #ffffff;
+    animation: regRowGlowLoop 2.2s ease-in-out infinite;
+  }
+  .seat-row.registered:hover {
+    background: linear-gradient(95deg, #215180 0%, #592a65 52%, #23658a 100%);
+  }
+  .seat-row.registered::after {
+    content: "";
+    position: absolute;
+    top: 0; bottom: 0; width: 34%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.22), transparent);
+    transform: skewX(-20deg);
+    animation: regRowShimmerLoop 2.6s ease-in-out infinite;
+    pointer-events: none;
+  }
+  .seat-row.registered > * {
+    position: relative;
+    z-index: 1;
+  }
+
+  .r-no { font-weight: 800; font-size: 11px; color: var(--logo-pink-dark); }
+  .seat-row.registered .r-no { color: #f9a8d4; }
+
+  .copy-box {
+    display: flex; align-items: center; justify-content: space-between; gap: 3px;
+    background: #ffffff; border: 1px solid var(--tbl-border); border-radius: 6px;
+    padding: 2px 5px; min-width: 0;
+  }
+  .seat-row.registered .copy-box {
+    background: rgba(13, 21, 36, 0.62);
+    border-color: rgba(130, 175, 235, 0.34);
+  }
+
+  .tt-txt {
+    font-size: 10px; font-weight: 700; color: var(--logo-pink-dark);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    user-select: all; cursor: text; flex: 1;
+  }
+  .seat-row.registered .tt-txt { color: #f9a8d4; }
+
+  .disp-txt {
+    font-size: 10px; font-weight: 700; color: var(--logo-cyan-dark);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    user-select: all; cursor: text; flex: 1;
+  }
+  .seat-row.registered .disp-txt { color: #7dd3fc; }
+
+  .box-empty { color: #9aa8be; font-style: italic; font-weight: 400; user-select: none; }
+  .seat-row.registered .box-empty { color: rgba(219, 234, 254, 0.55); }
+
+  .copy-mini {
+    background: #eef3f9; color: var(--tbl-text); border: 1px solid var(--tbl-border);
+    border-radius: 4px; padding: 1px 4px; font-size: 8.5px; font-weight: 700; flex-shrink: 0;
+  }
+  .copy-mini:hover { background: rgba(29, 124, 168, 0.15); color: var(--logo-cyan-dark); }
+  .seat-row.registered .copy-mini {
+    background: rgba(255, 255, 255, 0.14);
+    color: #eef3fa;
+    border-color: rgba(255, 255, 255, 0.24);
+  }
+  .seat-row.registered .copy-mini:hover {
+    background: rgba(87, 193, 239, 0.28);
+    color: #ffffff;
+  }
+
+  .player-cell { display: flex; align-items: center; gap: 6px; min-width: 0; }
+  .ava-box {
+    width: 24px; height: 24px; border-radius: 999px;
+    border: 1.5px solid var(--tbl-border); background: #ffffff;
+    overflow: hidden; display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; font-size: 9.5px; font-weight: 800; color: var(--logo-cyan-dark);
+    transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.18s ease, border-color 0.18s ease;
+  }
+  .ava-box.clickable-ava {
+    cursor: pointer;
+    border-color: var(--logo-pink);
+    box-shadow: 0 0 0 1px rgba(235, 108, 163, 0.28);
+  }
+  .ava-box.clickable-ava:hover {
+    transform: scale(1.16);
+    box-shadow: 0 4px 12px rgba(87, 193, 239, 0.42);
+  }
+  .seat-row.registered .ava-box {
+    background: #10192b;
+    color: #7dd3fc;
+    border-color: #eb6ca3;
+  }
+  .ava-box img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+  .r-name { font-weight: 700; font-size: 10.5px; color: var(--tbl-text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .seat-row.registered .r-name { color: #ffffff; }
+  .r-empty { color: var(--tbl-muted); font-style: italic; font-weight: 400; font-size: 10px; }
+  .seat-row.registered .r-empty { color: rgba(219, 234, 254, 0.65); }
+
+  .r-badge {
+    display: inline-block; text-align: center; font-size: 9px; font-weight: 800;
+    padding: 2px 6px; border-radius: 999px;
+    background: rgba(104, 120, 145, 0.14); color: var(--tbl-muted);
+  }
+  .badge-reg {
+    background: linear-gradient(135deg, #57c1ef, #eb6ca3);
+    color: #0b111c;
+    font-weight: 900;
+  }
+
+  .r-val { font-weight: 800; font-size: 11px; color: var(--logo-cyan-dark); text-align: right; }
+  .seat-row.registered .r-val { color: #7dd3fc; }
+
+  .pay-btn { padding: 2px 4px; border-radius: 5px; font-size: 9px; width: 100%; }
+  .paid { background: var(--soft-mint-bg); color: var(--soft-mint-dark); border: 1px solid rgba(22, 124, 86, 0.32); }
+  .unpaid { background: var(--soft-rose-bg); color: var(--soft-rose-dark); border: 1px solid rgba(168, 44, 104, 0.32); }
+
+  .seat-row.registered .pay-btn.paid {
+    background: rgba(110, 231, 183, 0.22);
+    color: #6ee7b7;
+    border-color: rgba(110, 231, 183, 0.5);
+  }
+  .seat-row.registered .pay-btn.unpaid {
+    background: rgba(244, 114, 182, 0.24);
+    color: #fbcfe8;
+    border-color: rgba(244, 114, 182, 0.55);
+  }
+
+  .r-actions { display: flex; gap: 3px; justify-content: flex-end; }
+  .r-actions button { padding: 2px 6px; font-size: 9.5px; border-radius: 5px; }
+
+  .seat-row.registered .r-actions .b-cyan {
+    background: rgba(87, 193, 239, 0.24);
+    color: #bae6fd;
+    border-color: rgba(87, 193, 239, 0.55);
+  }
+  .seat-row.registered .r-actions .b-pink {
+    background: rgba(235, 108, 163, 0.26);
+    color: #fbcfe8;
+    border-color: rgba(235, 108, 163, 0.58);
+  }
+  .seat-row.registered .r-actions .b-soft {
+    background: rgba(255, 255, 255, 0.14);
+    color: #eef3fa;
+    border-color: rgba(255, 255, 255, 0.28);
+  }
+
+  /* MODAL DAFTAR & POPUP FULL-BODY */
+  .modal {
+    display: none; position: fixed; inset: 0; background: rgba(9, 13, 22, 0.78);
+    backdrop-filter: blur(2px);
+    justify-content: center; align-items: center; z-index: 100; padding: 12px;
+    opacity: 0; transition: opacity 0.18s ease;
+  }
+  .modal.active { display: flex; opacity: 1; }
+
+  @keyframes modalPopIn {
+    0% { opacity: 0; transform: translateY(12px) scale(0.94); }
+    100% { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  .modal-content {
+    background: var(--bg-card); padding: 16px; border-radius: 14px;
+    width: 100%; max-width: 540px; border: 1px solid var(--border-cyan);
+    box-shadow: 0 20px 44px rgba(0, 0, 0, 0.6);
+    animation: modalPopIn 0.24s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .modal-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; gap: 8px; }
+  .modal-head h3 { color: var(--logo-cyan); font-size: 15px; font-weight: 800; }
+  .ava-status { font-size: 10.5px; color: var(--text-muted); margin-top: 3px; min-height: 14px; }
+
+  .modal-body-grid {
+    display: grid;
+    grid-template-columns: 168px 1fr;
+    gap: 14px;
+    align-items: start;
+  }
+  @media (max-width: 520px) {
+    .modal-body-grid { grid-template-columns: 1fr; }
+  }
+
+  .fullbody-panel {
+    background: linear-gradient(180deg, #f5f8fc 0%, #e7eef7 100%);
+    border: 1.5px solid var(--border-pink);
+    border-radius: 12px;
+    padding: 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+  }
+  .fullbody-frame {
+    width: 100%;
+    height: 235px;
+    border-radius: 9px;
+    background: #ffffff;
+    border: 1px solid rgba(44, 78, 124, 0.14);
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 38px;
+    font-weight: 800;
+    color: var(--logo-cyan-dark);
+  }
+  .fullbody-frame img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+  }
+  .fullbody-label {
+    font-size: 9.5px;
+    font-weight: 800;
+    color: var(--tbl-muted);
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+  }
+
+  /* POPUP AVA FULL-BODY DARI TABEL */
+  .fb-popup-card {
+    background: var(--bg-card);
+    border: 1.5px solid var(--border-cyan);
+    border-radius: 16px;
+    padding: 16px;
+    width: 100%;
+    max-width: 310px;
+    box-shadow: 0 22px 48px rgba(0, 0, 0, 0.65);
+    animation: modalPopIn 0.24s cubic-bezier(0.34, 1.56, 0.64, 1);
+    text-align: center;
+  }
+  .fb-popup-top {
+    display: flex; justify-content: space-between; align-items: center; gap: 8px;
+    margin-bottom: 10px; text-align: left;
+  }
+  .fb-popup-title { font-size: 14px; font-weight: 800; color: var(--logo-cyan); }
+  .fb-popup-sub { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+  .fb-popup-stage {
+    width: 100%;
+    height: 310px;
+    border-radius: 12px;
+    background: linear-gradient(180deg, #f5f8fc 0%, #e7eef7 100%);
+    border: 1.5px solid var(--border-pink);
+    overflow: hidden;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 54px; font-weight: 800; color: var(--logo-cyan-dark);
+  }
+  .fb-popup-stage img {
+    width: 100%; height: 100%; object-fit: contain; display: block;
+  }
+  .fb-popup-footer {
+    margin-top: 12px;
+    display: flex; gap: 6px; justify-content: center;
+  }
+
+  .form-group { margin-bottom: 9px; }
+  .form-group label { display: block; font-size: 10px; margin-bottom: 3px; color: var(--text-muted); font-weight: 600; }
+  .form-group input[type="text"], .form-group input[type="number"] { width: 100%; padding: 6px 8px; font-size: 12px; }
+  .input-copy-row { display: flex; gap: 5px; align-items: center; }
+  .input-copy-row input { flex: 1; }
+
+  .empty-filter-msg { padding: 18px; text-align: center; color: var(--tbl-muted); font-size: 11px; }
+  #infoBar { margin-left: 4px; font-size: 10.5px; font-weight: 700; color: var(--logo-cyan); }
+</style>
+</head>
+<body>
+
+<div class="toast-wrap" id="toastWrap"></div>
+<div class="sparkle-layer" id="sparkleLayer"></div>
+
+<div class="wrap">
+
+  <div class="top-bar">
+    <div class="top-left">
+      <div class="brand-title">KURSI <span class="c-cyan">GAL</span><span class="c-pink">TAM</span></div>
+      <div class="pills">
+        <span class="pill pill-htm">HTM: <strong id="dHtm" style="margin-left:3px">R14</strong></span>
+        <span class="pill">CATATAN: <span id="dNote" style="color:var(--text-main);margin-left:3px">SLOT TERBATAS • LANGSUNG MASUK</span></span>
+      </div>
+    </div>
+
+    <div class="right-stats">
+      <div class="mini-stat" id="statSlotBox">
+        <small>TERDAFTAR</small>
+        <strong id="dSlot">0/19</strong>
+      </div>
+      <div class="mini-stat pink" id="statTotalBox">
+        <small>TOTAL HTM</small>
+        <strong id="dTotal">R0</strong>
+      </div>
+    </div>
+  </div>
+
+  <div class="full-banner" id="fullBanner">
+    <div class="full-banner-left">
+      <span class="full-pill">KURSI FULL!</span>
+      <span class="full-banner-text">Semua kursi Galtam sudah terisi penuh!</span>
+    </div>
+    <div class="full-banner-sub" id="fullBannerSub">Total Terkumpul: R0</div>
+  </div>
+
+  <div class="cfg-bar">
+    <label>Kursi:</label><input type="number" id="inCount" value="19" min="1" max="30" style="width:42px">
+    <label>HTM:</label><input type="number" id="inHtm" value="14" step="1" style="width:52px">
+    <label>Catatan:</label><input type="text" id="inNote" value="SLOT TERBATAS • LANGSUNG MASUK" style="width:210px">
+    <button type="button" class="b-cyan" onclick="saveCfg()">Simpan</button>
+    <button type="button" class="b-grad" onclick="toggleSound()" id="soundBtn">Suara: ON</button>
+    <span id="infoBar"></span>
+    <button type="button" class="b-pink" style="margin-left:auto;" onclick="resetAll()">Reset</button>
+  </div>
+
+  <div class="list-panel" id="listPanel">
+    <div class="list-head">
+      <div class="list-head-left">
+        <h2>DAFTAR KURSI &amp; HTM</h2>
+        <div class="filter-group">
+          <button type="button" class="b-soft active-filter" id="fltAll" onclick="setFilter('all')">Semua</button>
+          <button type="button" class="b-soft" id="fltFilled" onclick="setFilter('filled')">Terisi</button>
+          <button type="button" class="b-soft" id="fltEmpty" onclick="setFilter('empty')">Kosong</button>
+        </div>
+        <input type="text" class="search-in" id="searchInput" placeholder="Cari nama / TikTok..." oninput="render(false)">
+      </div>
+
+      <div class="sum-pills">
+        <span>OKE: <strong id="wPaidCnt" style="color:var(--soft-mint-dark)">0/0</strong></span>
+        <span>MASUK: <strong id="wPaidSum" style="color:var(--soft-mint-dark)">R0</strong></span>
+        <span>PENDING: <strong id="wUnpaidSum" style="color:var(--soft-rose-dark)">R0</strong></span>
+        <button type="button" class="b-pink" onclick="copyAllTikTok()">Salin TikTok</button>
+        <button type="button" class="b-cyan" onclick="copyAllDisplays()">Salin Display</button>
+        <button type="button" class="b-grad" onclick="copyList()">Salin List</button>
+      </div>
+    </div>
+    <div class="two-col-grid">
+      <div class="col-box" id="colLeft"></div>
+      <div class="col-box" id="colRight"></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- MODAL DAFTAR / EDIT KURSI -->
+<div class="modal" id="regModal">
+  <div class="modal-content">
+    <div class="modal-head">
+      <div>
+        <h3 id="modalTitle">Daftar Kursi #1</h3>
+        <div class="ava-status" id="avaStatus">Isi Nama TikTok &amp; Username Roblox</div>
+      </div>
+      <button type="button" class="b-soft" style="padding:4px 9px;font-size:11px;" onclick="closeModal()">Tutup</button>
+    </div>
+
+    <div class="modal-body-grid">
+      <div class="fullbody-panel">
+        <div class="fullbody-frame" id="avaPreview">?</div>
+        <div class="fullbody-label">Full-Body Avatar</div>
+      </div>
+
+      <div>
+        <div class="form-group">
+          <label>1. Nama TikTok</label>
+          <div class="input-copy-row">
+            <input type="text" id="tiktokInput" placeholder="Contoh: Creymoon...">
+            <button type="button" class="b-pink" style="padding:5px 8px;font-size:10px;" onclick="copyModalTikTok()">Copy</button>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>2. Display Name (Otomatis / Bisa Diedit)</label>
+          <div class="input-copy-row">
+            <input type="text" id="displayInput" placeholder="Display name muncul di sini...">
+            <button type="button" class="b-cyan" style="padding:5px 8px;font-size:10px;" onclick="copyModalDisplay()">Copy</button>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>3. Username Roblox (Otomatis Cek Display &amp; Full-Body)</label>
+          <input type="text" id="bidderInput" placeholder="Ketik username Roblox...">
+        </div>
+        <div class="form-group">
+          <label>HTM Kursi (Angka, misal 14 untuk R14)</label>
+          <input type="number" id="amountInput" step="1">
+        </div>
+        <div style="display:flex; gap:5px; margin-top:11px;">
+          <button type="button" class="b-cyan" style="flex:1; padding:6px;" onclick="saveReg()">Simpan</button>
+          <button type="button" class="b-pink" style="padding:6px 8px;" onclick="clearCurrentSeat()">Kosongkan</button>
+          <button type="button" class="b-soft" style="padding:6px 8px;" onclick="closeModal()">Batal</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- POPUP AVA FULL-BODY SAAT FOTO AVA DI DAFTAR DIKLIK -->
+<div class="modal" id="fullBodyModal" onclick="if(event.target===this) closeFullBodyModal()">
+  <div class="fb-popup-card">
+    <div class="fb-popup-top">
+      <div>
+        <div class="fb-popup-title" id="fbPopupTitle">Kursi #1</div>
+        <div class="fb-popup-sub" id="fbPopupSub">Full-Body Avatar</div>
+      </div>
+      <button type="button" class="b-soft" style="padding:4px 9px;font-size:11px;" onclick="closeFullBodyModal()">Tutup</button>
+    </div>
+    <div class="fb-popup-stage" id="fbPopupStage">?</div>
+    <div class="fb-popup-footer">
+      <button type="button" class="b-cyan" id="fbEditBtn" style="padding:5px 12px;">Edit Kursi</button>
+      <button type="button" class="b-soft" style="padding:5px 12px;" onclick="closeFullBodyModal()">Selesai</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  var cfg = { count: 19, htm: 14, note: 'SLOT TERBATAS • LANGSUNG MASUK' };
+  var seats = [];
+  var activeSeatIndex = null;
+  var fullBodySeatIndex = null;
+  var wasAllFull = false;
+  var currentFilter = 'all';
+  var soundEnabled = true;
+  var audioCtx = null;
+  var toastTimer = null;
+
+  var robloxCache = {};
+  var currentModalFullBody = '';
+  var currentModalHeadshot = '';
+  var manualDisplayOverride = false;
+  var lookupTimer = null;
+
+  function rFmt(n) { return 'R' + Number(n || 0); }
+
+  function esc(str) {
+    return String(str || '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  function initialChar(name) {
+    var t = String(name || '').trim();
+    return t ? t.charAt(0).toUpperCase() : '?';
+  }
+
+  function setInfo(msg) {
+    var b = document.getElementById('infoBar');
+    if (b) { b.innerText = msg; }
+  }
+
+  function getAudioCtx() {
+    if (!soundEnabled) return null;
+    var Ctx = window.AudioContext || window.webkitAudioContext;
+    if (!Ctx) return null;
+    if (!audioCtx) audioCtx = new Ctx();
+    if (audioCtx.state === 'suspended') {
+      audioCtx.resume().catch(function() {});
+    }
+    return audioCtx;
+  }
+
+  function playTone(freq, startOffset, duration, type, gainPeak) {
+    var ctx = getAudioCtx();
+    if (!ctx) return;
+    var now = ctx.currentTime + (startOffset || 0);
+    var osc = ctx.createOscillator();
+    var gain = ctx.createGain();
+    osc.type = type || 'sine';
+    osc.frequency.setValueAtTime(freq, now);
+    gain.gain.setValueAtTime(0.0008, now);
+    gain.gain.exponentialRampToValueAtTime(gainPeak || 0.085, now + 0.012);
+    gain.gain.exponentialRampToValueAtTime(0.0008, now + (duration || 0.11));
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start(now);
+    osc.stop(now + (duration || 0.11) + 0.015);
+  }
+
+  function playButtonTone(kind) {
+    if (!soundEnabled) return;
+    if (kind === 'cyan') {
+      playTone(659.25, 0, 0.065, 'triangle', 0.08);
+      playTone(880.00, 0.045, 0.08, 'triangle', 0.075);
+    } else if (kind === 'pink') {
+      playTone(587.33, 0, 0.065, 'triangle', 0.08);
+      playTone(440.00, 0.045, 0.08, 'sine', 0.07);
+    } else if (kind === 'grad') {
+      playTone(523.25, 0, 0.06, 'sine', 0.075);
+      playTone(659.25, 0.045, 0.065, 'sine', 0.075);
+      playTone(783.99, 0.09, 0.09, 'sine', 0.08);
+    } else {
+      playTone(587.33, 0, 0.06, 'sine', 0.07);
+      playTone(739.99, 0.04, 0.07, 'sine', 0.065);
+    }
+  }
+
+  document.addEventListener('click', function(ev) {
+    var btn = ev.target && ev.target.closest ? ev.target.closest('button') : null;
+    if (!btn || btn.disabled) return;
+    if (btn.id === 'soundBtn') return;
+    if (btn.classList.contains('b-cyan')) playButtonTone('cyan');
+    else if (btn.classList.contains('b-pink')) playButtonTone('pink');
+    else if (btn.classList.contains('b-grad')) playButtonTone('grad');
+    else playButtonTone('soft');
+  }, true);
+
+  function speakText(text) {
+    if (!soundEnabled || !text) return;
+    if (!('speechSynthesis' in window) || typeof SpeechSynthesisUtterance === 'undefined') return;
+    try {
+      window.speechSynthesis.cancel();
+      var utter = new SpeechSynthesisUtterance(String(text));
+      utter.lang = 'id-ID';
+      utter.rate = 1.03;
+      utter.pitch = 1.0;
+      utter.volume = 1.0;
+      window.speechSynthesis.speak(utter);
+    } catch (e) {}
+  }
+
+  function soundSeatRegistered(spokenLabel, seatId) {
+    playTone(587.33, 0.00, 0.11, 'triangle', 0.12);
+    playTone(739.99, 0.08, 0.11, 'sine', 0.13);
+    playTone(880.00, 0.16, 0.16, 'sine', 0.15);
+    playTone(1174.66, 0.24, 0.22, 'sine', 0.12);
+    if (spokenLabel && seatId) {
+      setTimeout(function() {
+        speakText(spokenLabel + ' terdaftar di kursi ' + seatId);
+      }, 240);
+    }
+  }
+
+  function soundAllSeatsFull() {
+    playTone(523.25, 0.00, 0.11, 'triangle', 0.12);
+    playTone(659.25, 0.09, 0.11, 'triangle', 0.12);
+    playTone(783.99, 0.18, 0.12, 'sine', 0.14);
+    playTone(1046.50, 0.27, 0.16, 'sine', 0.15);
+    playTone(1318.51, 0.37, 0.28, 'sine', 0.14);
+    setTimeout(function() {
+      speakText('Semua kursi sudah penuh');
+    }, 450);
+  }
+
+  function toggleSound() {
+    soundEnabled = !soundEnabled;
+    document.getElementById('soundBtn').innerText = soundEnabled ? 'Suara: ON' : 'Suara: OFF';
+    if (!soundEnabled && 'speechSynthesis' in window) {
+      try { window.speechSynthesis.cancel(); } catch (e) {}
+    }
+    if (soundEnabled) {
+      playTone(659.25, 0, 0.08, 'sine', 0.09);
+      playTone(783.99, 0.065, 0.09, 'sine', 0.09);
+      playTone(987.77, 0.13, 0.12, 'sine', 0.095);
+      setInfo('Suara & nada aktif');
+    } else {
+      setInfo('Suara & nada dimatikan');
+    }
+  }
+
+  function spawnSparkles(centerX, centerY, count, spreadY, isGrandFull) {
+    var layer = document.getElementById('sparkleLayer');
+    if (!layer) return;
+    var palette = ['#57c1ef', '#eb6ca3', '#6ee7b7', '#93c5fd', '#f9a8d4', '#fde68a'];
+    var totalPieces = count || 22;
+    var yTravel = spreadY || 120;
+
+    var i = 0;
+    while (i < totalPieces) {
+      var el = document.createElement('span');
+      el.className = 'sparkle-piece';
+      var angle = (Math.PI * 2 * i) / totalPieces + (Math.random() * 0.35);
+      var dist = (isGrandFull ? 65 : 35) + Math.random() * (isGrandFull ? 150 : 85);
+      var dxMid = Math.cos(angle) * (dist * 0.55);
+      var dxEnd = Math.cos(angle) * dist;
+
+      var leftPos = isGrandFull
+        ? (Math.random() * (window.innerWidth - 20) + 10)
+        : Math.max(8, Math.min(window.innerWidth - 16, (typeof centerX === 'number' ? centerX : window.innerWidth / 2) + (Math.random() - 0.5) * 95));
+
+      var topPos = isGrandFull
+        ? (12 + Math.random() * 55)
+        : Math.max(8, (typeof centerY === 'number' ? centerY : 44) + (Math.random() - 0.5) * 24);
+
+      var dur = isGrandFull ? (1.25 + Math.random() * 0.55) : (0.95 + Math.random() * 0.25);
+      var fallDist = yTravel + Math.random() * 65;
+
+      el.style.left = leftPos + 'px';
+      el.style.top = topPos + 'px';
+      el.style.background = palette[i % palette.length];
+      el.style.setProperty('--dx-mid', dxMid.toFixed(1) + 'px');
+      el.style.setProperty('--dx-end', dxEnd.toFixed(1) + 'px');
+      el.style.setProperty('--dy-end', fallDist.toFixed(1) + 'px');
+      el.style.setProperty('--dur', dur.toFixed(2) + 's');
+      if (isGrandFull) {
+        el.style.width = (7 + (i % 4)) + 'px';
+        el.style.height = (7 + ((i + 1) % 4)) + 'px';
+      }
+      if (i % 3 === 0) el.style.borderRadius = '999px';
+
+      layer.appendChild(el);
+      (function(node, lifeMs) {
+        setTimeout(function() {
+          if (node && node.parentNode) node.parentNode.removeChild(node);
+        }, lifeMs);
+      })(el, Math.round(dur * 1000) + 80);
+      i++;
+    }
+  }
+
+  function bumpStats() {
+    var b1 = document.getElementById('statSlotBox');
+    var b2 = document.getElementById('statTotalBox');
+    if (b1) {
+      b1.classList.remove('bump');
+      void b1.offsetWidth;
+      b1.classList.add('bump');
+      setTimeout(function() { b1.classList.remove('bump'); }, 360);
+    }
+    if (b2) {
+      b2.classList.remove('bump');
+      void b2.offsetWidth;
+      b2.classList.add('bump');
+      setTimeout(function() { b2.classList.remove('bump'); }, 360);
+    }
+  }
+
+  function showPopup(tag, message, isFullMode) {
+    var wrap = document.getElementById('toastWrap');
+    if (!wrap) return;
+    clearTimeout(toastTimer);
+    var boxCls = isFullMode ? 'toast-box full-toast' : 'toast-box';
+    wrap.innerHTML = '<div class="' + boxCls + '" id="activeToast">' +
+      '<span class="toast-tag">' + esc(tag) + '</span>' +
+      '<span class="toast-msg">' + esc(message) + '</span>' +
+    '</div>';
+    requestAnimationFrame(function() {
+      var el = document.getElementById('activeToast');
+      if (el) {
+        el.className = boxCls + ' show';
+        var rect = el.getBoundingClientRect();
+        spawnSparkles(
+          rect.left + rect.width / 2,
+          rect.top + rect.height / 2,
+          isFullMode ? 48 : 22,
+          isFullMode ? 175 : 115,
+          Boolean(isFullMode)
+        );
+      }
+    });
+    bumpStats();
+    toastTimer = setTimeout(function() {
+      var el = document.getElementById('activeToast');
+      if (el) el.className = boxCls;
+      setTimeout(function() {
+        if (wrap) wrap.innerHTML = '';
+      }, 240);
+    }, isFullMode ? 3200 : 2500);
+  }
+
+  function copyTextSafe(txt, doneMsg) {
+    if (!txt) return;
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(txt).catch(function() {});
+    }
+    setInfo(doneMsg || 'Tersalin!');
+  }
+
+  function setFilter(mode) {
+    currentFilter = mode;
+    document.getElementById('fltAll').className = 'b-soft' + (mode === 'all' ? ' active-filter' : '');
+    document.getElementById('fltFilled').className = 'b-soft' + (mode === 'filled' ? ' active-filter' : '');
+    document.getElementById('fltEmpty').className = 'b-soft' + (mode === 'empty' ? ' active-filter' : '');
+    render(false);
+  }
+
+  function makeSeat(idx, prev) {
+    var hasPrevData = Boolean(prev && (prev.name || prev.tiktok || prev.displayName));
+    return {
+      id: idx + 1,
+      tiktok: (prev && prev.tiktok) ? prev.tiktok : '',
+      name: (prev && prev.name) ? prev.name : '',
+      displayName: (prev && prev.displayName) ? prev.displayName : '',
+      avatarUrl: (prev && prev.avatarUrl) ? prev.avatarUrl : '',
+      fullBodyUrl: (prev && prev.fullBodyUrl) ? prev.fullBodyUrl : '',
+      val: hasPrevData ? Number(prev.val || cfg.htm) : 0,
+      locked: Boolean(prev && prev.locked),
+      paid: Boolean(prev && prev.paid)
+    };
+  }
+
+  function initSeats() {
+    var old = seats.slice();
+    seats = [];
+    var k = 0;
+    while (k < cfg.count) {
+      seats.push(makeSeat(k, old[k]));
+      k++;
+    }
+
+    document.getElementById('inCount').value = cfg.count;
+    document.getElementById('inHtm').value = cfg.htm;
+    document.getElementById('inNote').value = cfg.note;
+
+    document.getElementById('dHtm').innerText = rFmt(cfg.htm);
+    document.getElementById('dNote').innerText = cfg.note || '-';
+    render(false);
+  }
+
+  function renderAvatarBox(url, fallbackText, seatIdx) {
+    var div = document.createElement('div');
+    div.className = 'ava-box clickable-ava';
+    div.title = 'Klik untuk lihat Ava Full-Body';
+    div.setAttribute('onclick', 'openFullBodyPopup(' + seatIdx + ')');
+    if (url) {
+      var img = document.createElement('img');
+      img.src = url;
+      img.alt = 'ava';
+      img.onerror = function() {
+        div.innerHTML = '';
+        div.textContent = fallbackText;
+      };
+      div.appendChild(img);
+    } else {
+      div.textContent = fallbackText;
+    }
+    return div.outerHTML;
+  }
+
+  function openFullBodyPopup(index) {
+    var st = seats[index];
+    if (!st) return;
+    fullBodySeatIndex = index;
+
+    var cached = st.name ? robloxCache[st.name.toLowerCase()] : null;
+    var fbUrl = st.fullBodyUrl || (cached && (cached.fullBodyUrl || cached.avatarUrl)) || st.avatarUrl || '';
+    var headUrl = st.avatarUrl || (cached && cached.avatarUrl) || '';
+    var who = st.displayName || st.name || st.tiktok || 'Peserta';
+    var initChar = initialChar(st.name || st.displayName || st.tiktok);
+
+    document.getElementById('fbPopupTitle').innerText = 'Kursi #' + st.id + ' • ' + who;
+    document.getElementById('fbPopupSub').innerText = st.name
+      ? ('Roblox: @' + st.name + (st.tiktok ? ' • TT: ' + st.tiktok : ''))
+      : (st.tiktok ? ('TikTok: ' + st.tiktok) : 'Full-Body Avatar');
+
+    var stage = document.getElementById('fbPopupStage');
+    stage.innerHTML = '';
+    var src = fbUrl || headUrl;
+    if (src) {
+      var img = document.createElement('img');
+      img.src = src;
+      img.alt = 'fullbody';
+      img.onerror = function() {
+        if (headUrl && img.src !== headUrl) {
+          img.src = headUrl;
+          return;
+        }
+        stage.innerHTML = '';
+        stage.textContent = initChar;
+      };
+      stage.appendChild(img);
+    } else {
+      stage.textContent = initChar;
+    }
+
+    document.getElementById('fbEditBtn').onclick = function() {
+      var targetIdx = fullBodySeatIndex;
+      closeFullBodyModal();
+      if (targetIdx !== null) openModal(targetIdx);
+    };
+
+    document.getElementById('fullBodyModal').className = 'modal active';
+  }
+
+  function closeFullBodyModal() {
+    document.getElementById('fullBodyModal').className = 'modal';
+    fullBodySeatIndex = null;
+  }
+
+  function renderTikTokCell(seat, idx) {
+    var tName = (seat.tiktok || '').trim();
+    if (!tName) {
+      return '<div class="copy-box"><span class="tt-txt box-empty">-</span></div>';
+    }
+    return '<div class="copy-box" title="TikTok: ' + esc(tName) + '">' +
+      '<span class="tt-txt">' + esc(tName) + '</span>' +
+      '<button type="button" class="copy-mini" onclick="copySeatTikTok(' + idx + ')">Copy</button>' +
+    '</div>';
+  }
+
+  function renderDisplayCell(seat, idx) {
+    var dName = (seat.displayName || '').trim();
+    if (!dName) {
+      return '<div class="copy-box"><span class="disp-txt box-empty">-</span></div>';
+    }
+    return '<div class="copy-box" title="Display: ' + esc(dName) + '">' +
+      '<span class="disp-txt">' + esc(dName) + '</span>' +
+      '<button type="button" class="copy-mini" onclick="copySeatDisplay(' + idx + ')">Copy</button>' +
+    '</div>';
+  }
+
+  function copySeatTikTok(idx) {
+    var st = seats[idx];
+    if (!st || !st.tiktok) return;
+    copyTextSafe(st.tiktok.trim(), 'TikTok #' + st.id + ' tersalin!');
+  }
+
+  function copySeatDisplay(idx) {
+    var st = seats[idx];
+    if (!st || !st.displayName) return;
+    copyTextSafe(st.displayName.trim(), 'Display #' + st.id + ' tersalin!');
+  }
+
+  function copyModalTikTok() {
+    var val = document.getElementById('tiktokInput').value.trim();
+    if (!val) return;
+    copyTextSafe(val, 'TikTok tersalin!');
+  }
+
+  function copyModalDisplay() {
+    var val = document.getElementById('displayInput').value.trim();
+    if (!val) return;
+    copyTextSafe(val, 'Display tersalin!');
+  }
+
+  function matchesFilterAndSearch(st, q) {
+    var isFilled = Boolean(st.name || st.tiktok || st.displayName);
+    if (currentFilter === 'filled' && !isFilled) return false;
+    if (currentFilter === 'empty' && isFilled) return false;
+    if (!q) return true;
+    var hay = [st.id, st.tiktok, st.displayName, st.name].join(' ').toLowerCase();
+    return hay.indexOf(q) !== -1;
+  }
+
+  function buildSeatRow(st, idx) {
+    var labelSource = st.name || st.tiktok || st.displayName;
+    var seatFee = labelSource ? Number(st.val || cfg.htm) : 0;
+
+    var badge = 'OPEN', bCls = '', rowCls = 'seat-row';
+    if (labelSource) {
+      badge = st.locked ? 'LOCK' : 'ISI';
+      bCls = 'badge-reg';
+      rowCls += ' registered';
+    }
+
+    var payHtml = labelSource
+      ? '<button type="button" class="pay-btn ' + (st.paid ? 'paid' : 'unpaid') + '" onclick="togglePaid(' + idx + ')">' + (st.paid ? 'OKE' : 'WAIT') + '</button>'
+      : '<span style="color:#687891;font-size:9px;">-</span>';
+
+    var cached = st.name ? robloxCache[st.name.toLowerCase()] : null;
+    var avaUrl = st.avatarUrl || (cached && cached.avatarUrl) || (cached && cached.fullBodyUrl) || '';
+    var avaHtml = labelSource
+      ? renderAvatarBox(avaUrl, initialChar(st.name || st.displayName || st.tiktok), idx)
+      : '<div class="ava-box" style="color:#687891;">&bull;</div>';
+
+    var usnHtml = st.name
+      ? '<div class="r-name" title="Roblox: ' + esc(st.name) + '">' + esc(st.name) + '</div>'
+      : '<div class="r-name r-empty">' + ((st.tiktok || st.displayName) ? '-' : 'Kosong') + '</div>';
+
+    return '<div class="' + rowCls + '">' +
+      '<div class="r-no">#' + st.id + '</div>' +
+      renderTikTokCell(st, idx) +
+      renderDisplayCell(st, idx) +
+      '<div class="player-cell">' + avaHtml + usnHtml + '</div>' +
+      '<div><span class="r-badge ' + bCls + '">' + badge + '</span></div>' +
+      '<div class="r-val">' + rFmt(seatFee || cfg.htm) + '</div>' +
+      '<div>' + payHtml + '</div>' +
+      '<div class="r-actions">' +
+        '<button type="button" class="b-cyan" onclick="openModal(' + idx + ')">' + (labelSource ? 'Edit' : 'Daftar') + '</button>' +
+        '<button type="button" class="' + (st.locked ? 'b-pink' : 'b-soft') + '" onclick="toggleLock(' + idx + ')">' + (st.locked ? 'Buka' : 'Lock') + '</button>' +
+      '</div>' +
+    '</div>';
+  }
+
+  function syncFullStateUi(isFull, filled, total) {
+    var banner = document.getElementById('fullBanner');
+    var panel = document.getElementById('listPanel');
+    var slotBox = document.getElementById('statSlotBox');
+    var sub = document.getElementById('fullBannerSub');
+
+    if (banner) {
+      banner.className = isFull ? 'full-banner active' : 'full-banner';
+    }
+    if (panel) {
+      panel.className = isFull ? 'list-panel all-full' : 'list-panel';
+    }
+    if (slotBox) {
+      slotBox.className = isFull ? 'mini-stat is-full' : 'mini-stat';
+    }
+    if (sub) {
+      sub.innerText = filled + '/' + cfg.count + ' Kursi • Total HTM: ' + rFmt(total);
+    }
+  }
+
+  function render(allowFullCelebration) {
+    var shouldCelebrate = allowFullCelebration !== false;
+    var filled = 0, total = 0, paidCount = 0, paidAmount = 0, unpaidAmount = 0;
+    var q = (document.getElementById('searchInput').value || '').trim().toLowerCase();
+    var filteredIndices = [];
+
+    var i = 0;
+    while (i < seats.length) {
+      var st = seats[i];
+      var labelSource = st.name || st.tiktok || st.displayName;
+      var seatFee = labelSource ? Number(st.val || cfg.htm) : 0;
+
+      if (labelSource) {
+        filled++;
+        total += seatFee;
+        if (st.paid) { paidCount++; paidAmount += seatFee; }
+        else { unpaidAmount += seatFee; }
+      }
+
+      if (matchesFilterAndSearch(st, q)) {
+        filteredIndices.push(i);
+      }
+      i++;
+    }
+
+    var leftHtml = '';
+    var rightHtml = '';
+    if (!filteredIndices.length) {
+      leftHtml = '<div class="empty-filter-msg">Tidak ada kursi yang cocok dengan filter/pencarian.</div>';
+    } else {
+      var split = Math.ceil(filteredIndices.length / 2);
+      var k = 0;
+      while (k < filteredIndices.length) {
+        var realIdx = filteredIndices[k];
+        var rowHtml = buildSeatRow(seats[realIdx], realIdx);
+        if (k < split) leftHtml += rowHtml;
+        else rightHtml += rowHtml;
+        k++;
+      }
+    }
+
+    document.getElementById('colLeft').innerHTML = leftHtml;
+    document.getElementById('colRight').innerHTML = rightHtml;
+
+    document.getElementById('dSlot').innerText = filled + '/' + cfg.count;
+    document.getElementById('dTotal').innerText = rFmt(total);
+    document.getElementById('wPaidCnt').innerText = paidCount + '/' + filled;
+    document.getElementById('wPaidSum').innerText = rFmt(paidAmount);
+    document.getElementById('wUnpaidSum').innerText = rFmt(unpaidAmount);
+
+    var isFullNow = cfg.count > 0 && filled >= cfg.count;
+    syncFullStateUi(isFullNow, filled, total);
+
+    if (isFullNow && !wasAllFull && shouldCelebrate) {
+      soundAllSeatsFull();
+      showPopup('KURSI FULL', 'Semua ' + cfg.count + ' kursi penuh! Total HTM ' + rFmt(total), true);
+    }
+    wasAllFull = isFullNow;
+  }
+
+  function updateModalFullBody(url, fallbackUrl, name) {
+    currentModalFullBody = url || fallbackUrl || '';
+    currentModalHeadshot = fallbackUrl || url || '';
+    var box = document.getElementById('avaPreview');
+    box.innerHTML = '';
+    var srcToTry = url || fallbackUrl || '';
+    if (srcToTry) {
+      var img = document.createElement('img');
+      img.src = srcToTry;
+      img.alt = 'fullbody avatar';
+      img.onerror = function() {
+        if (fallbackUrl && img.src !== fallbackUrl) {
+          img.src = fallbackUrl;
+          return;
+        }
+        box.innerHTML = '';
+        box.textContent = initialChar(name);
+      };
+      box.appendChild(img);
+    } else {
+      box.textContent = initialChar(name);
+    }
+  }
+
+  function applyFoundRobloxProfile(key, uname, info) {
+    var prev = robloxCache[key] || {};
+    var merged = {
+      displayName: info.displayName || prev.displayName || '',
+      avatarUrl: info.avatarUrl || prev.avatarUrl || '',
+      fullBodyUrl: info.fullBodyUrl || prev.fullBodyUrl || info.avatarUrl || ''
+    };
+    robloxCache[key] = merged;
+
+    if (document.getElementById('bidderInput').value.trim().toLowerCase() !== key) return;
+
+    if (!manualDisplayOverride && merged.displayName) {
+      document.getElementById('displayInput').value = merged.displayName;
+    }
+    updateModalFullBody(merged.fullBodyUrl, merged.avatarUrl, uname);
+
+    var statusParts = [];
+    if (merged.displayName) statusParts.push('Display: ' + merged.displayName);
+    if (merged.fullBodyUrl || merged.avatarUrl) statusParts.push('Full-Body OK');
+    document.getElementById('avaStatus').innerText = statusParts.length ? statusParts.join(' • ') : 'Profil ditemukan';
+  }
+
+  function lookupRobloxUser(rawName) {
+    var uname = String(rawName || '').trim();
+    var stEl = document.getElementById('avaStatus');
+    var fallbackInit = uname || document.getElementById('tiktokInput').value.trim();
+
+    if (!uname) {
+      updateModalFullBody('', '', fallbackInit);
+      stEl.innerText = 'Isi Nama TikTok & Username Roblox';
+      return;
+    }
+
+    var key = uname.toLowerCase();
+    if (robloxCache[key] && (robloxCache[key].displayName || robloxCache[key].avatarUrl || robloxCache[key].fullBodyUrl)) {
+      applyFoundRobloxProfile(key, uname, robloxCache[key]);
+      return;
+    }
+
+    updateModalFullBody('', '', fallbackInit);
+    stEl.innerText = 'Mencari Display & Full-Body...';
+
+    if (!window.fetch || window.location.protocol === 'file:') {
+      stEl.innerText = 'Buka lewat link Netlify untuk cek otomatis';
+      return;
+    }
+
+    fetch('/.netlify/functions/roblox-lookup?u=' + encodeURIComponent(uname))
+      .then(function(res) { return res.ok ? res.json() : null; })
+      .then(function(data) {
+        if (data && data.ok) {
+          applyFoundRobloxProfile(key, uname, {
+            displayName: data.displayName || '',
+            avatarUrl: data.avatarUrl || '',
+            fullBodyUrl: data.fullBodyUrl || data.fullBodyAvatarUrl || data.avatarUrl || ''
+          });
+        } else if (document.getElementById('bidderInput').value.trim().toLowerCase() === key) {
+          stEl.innerText = 'Username tidak ketemu';
+        }
+      })
+      .catch(function() {
+        if (document.getElementById('bidderInput').value.trim().toLowerCase() === key) {
+          stEl.innerText = 'Function Netlify belum aktif';
+        }
+      });
+  }
+
+  document.getElementById('tiktokInput').addEventListener('input', function() {
+    var rblxVal = document.getElementById('bidderInput').value.trim();
+    if (!currentModalFullBody && !rblxVal) {
+      updateModalFullBody('', '', this.value);
+    }
+  });
+
+  document.getElementById('bidderInput').addEventListener('input', function() {
+    var val = this.value;
+    manualDisplayOverride = false;
+    currentModalFullBody = '';
+    currentModalHeadshot = '';
+    updateModalFullBody('', '', val || document.getElementById('tiktokInput').value);
+    clearTimeout(lookupTimer);
+    lookupTimer = setTimeout(function() {
+      lookupRobloxUser(val);
+    }, 350);
+  });
+
+  document.getElementById('displayInput').addEventListener('input', function() {
+    manualDisplayOverride = true;
+  });
+
+  function openModal(index) {
+    activeSeatIndex = index;
+    manualDisplayOverride = false;
+
+    var seat = seats[index];
+    document.getElementById('modalTitle').innerText = 'Daftar Kursi #' + seat.id + ' (HTM ' + rFmt(cfg.htm) + ')';
+    document.getElementById('tiktokInput').value = seat.tiktok || '';
+    document.getElementById('displayInput').value = seat.displayName || '';
+    document.getElementById('bidderInput').value = seat.name || '';
+    document.getElementById('amountInput').value = seat.val > 0 ? Number(seat.val) : Number(cfg.htm);
+
+    if (seat.displayName) manualDisplayOverride = true;
+
+    var cached = seat.name ? robloxCache[seat.name.toLowerCase()] : null;
+    var fbUrl = seat.fullBodyUrl || (cached && (cached.fullBodyUrl || cached.avatarUrl)) || seat.avatarUrl || '';
+    var headUrl = seat.avatarUrl || (cached && cached.avatarUrl) || '';
+
+    updateModalFullBody(fbUrl, headUrl, seat.name || seat.displayName || seat.tiktok || '');
+    document.getElementById('avaStatus').innerText = seat.name
+      ? 'Mengecek Display & Full-Body...'
+      : 'Isi Nama TikTok & Username Roblox';
+
+    document.getElementById('regModal').className = 'modal active';
+    document.getElementById('tiktokInput').focus();
+    if (seat.name) lookupRobloxUser(seat.name);
+  }
+
+  function closeModal() {
+    clearTimeout(lookupTimer);
+    document.getElementById('regModal').className = 'modal';
+    activeSeatIndex = null;
+    currentModalFullBody = '';
+    currentModalHeadshot = '';
+    manualDisplayOverride = false;
+  }
+
+  function clearCurrentSeat() {
+    if (activeSeatIndex === null) return;
+    var idx = activeSeatIndex;
+    seats[idx] = makeSeat(idx, null);
+    render(false);
+    closeModal();
+    setInfo('Kursi #' + (idx + 1) + ' dikosongkan');
+  }
+
+  function saveReg() {
+    if (activeSeatIndex === null) return;
+    var idx = activeSeatIndex;
+    var tt = document.getElementById('tiktokInput').value.trim();
+    var disp = document.getElementById('displayInput').value.trim();
+    var name = document.getElementById('bidderInput').value.trim();
+    var val = Number(document.getElementById('amountInput').value);
+    if (isNaN(val) || val < 0) val = Number(cfg.htm);
+
+    var whoLabel = '';
+    var spokenName = '';
+    var hasEntry = Boolean(tt || name || disp);
+
+    if (!hasEntry) {
+      seats[idx] = makeSeat(idx, null);
+    } else {
+      var cached = name ? robloxCache[name.toLowerCase()] : null;
+      var finalDisp = disp || (cached && cached.displayName) || '';
+      var finalAva = (cached && cached.avatarUrl) || currentModalHeadshot || currentModalFullBody || '';
+      var finalFullBody = currentModalFullBody || (cached && (cached.fullBodyUrl || cached.avatarUrl)) || finalAva || '';
+
+      seats[idx].tiktok = tt;
+      seats[idx].name = name;
+      seats[idx].displayName = finalDisp;
+      seats[idx].avatarUrl = finalAva;
+      seats[idx].fullBodyUrl = finalFullBody;
+      seats[idx].val = val;
+      seats[idx].locked = true;
+      whoLabel = finalDisp || tt || name;
+      spokenName = finalDisp || name || tt;
+    }
+
+    closeModal();
+    render(true);
+
+    if (whoLabel && !wasAllFull) {
+      soundSeatRegistered(spokenName, idx + 1);
+      showPopup('TERDAFTAR', whoLabel + ' terdaftar di kursi #' + (idx + 1) + ' (' + rFmt(val) + ')', false);
+    }
+  }
+
+  function toggleLock(index) {
+    seats[index].locked = !seats[index].locked;
+    render(false);
+  }
+
+  function togglePaid(index) {
+    if (!seats[index].name && !seats[index].tiktok && !seats[index].displayName) return;
+    seats[index].paid = !seats[index].paid;
+    render(false);
+  }
+
+  function saveCfg() {
+    cfg.count = Number(document.getElementById('inCount').value) || 19;
+    cfg.htm = Number(document.getElementById('inHtm').value) || 0;
+    cfg.note = document.getElementById('inNote').value.trim();
+    initSeats();
+    setInfo('HTM & pengaturan tersimpan!');
+  }
+
+  function copyAllTikTok() {
+    var lines = [];
+    var idx = 0;
+    while (idx < seats.length) {
+      var s = seats[idx];
+      if (s.tiktok && s.tiktok.trim()) {
+        lines.push('#' + s.id + ': ' + s.tiktok.trim());
+      }
+      idx++;
+    }
+    if (!lines.length) {
+      setInfo('Belum ada Nama TikTok!');
+      return;
+    }
+    copyTextSafe(lines.join('\n'), 'Semua TikTok tersalin!');
+  }
+
+  function copyAllDisplays() {
+    var lines = [];
+    var idx = 0;
+    while (idx < seats.length) {
+      var s = seats[idx];
+      if (s.displayName && s.displayName.trim()) {
+        lines.push('#' + s.id + ': ' + s.displayName.trim());
+      }
+      idx++;
+    }
+    if (!lines.length) {
+      setInfo('Belum ada Display Name!');
+      return;
+    }
+    copyTextSafe(lines.join('\n'), 'Semua Display tersalin!');
+  }
+
+  function copyList() {
+    var lines = [];
+    var idx = 0;
+    while (idx < seats.length) {
+      var s = seats[idx];
+      if (!s.name && !s.tiktok && !s.displayName) {
+        lines.push('#' + s.id + ': -');
+      } else {
+        var parts = [];
+        if (s.tiktok) parts.push('TT: ' + s.tiktok);
+        if (s.displayName) parts.push('Display: ' + s.displayName);
+        if (s.name) parts.push('USN: ' + s.name);
+        var fee = Number(s.val || cfg.htm);
+        lines.push('#' + s.id + ': ' + parts.join(' | ') + ' [HTM ' + rFmt(fee) + '] - ' + (s.paid ? 'OKE' : 'WAIT'));
+      }
+      idx++;
+    }
+    copyTextSafe(lines.join('\n'), 'List pendaftar tersalin!');
+  }
+
+  function resetAll() {
+    wasAllFull = false;
+    seats = [];
+    initSeats();
+    setInfo('Direset!');
+  }
+
+  document.getElementById('regModal').onkeypress = function(e) {
+    if (e.key === 'Enter') saveReg();
+  };
+
+  initSeats();
+</script>
+</body>
+</html>
