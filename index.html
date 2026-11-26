@@ -234,6 +234,10 @@
     background: linear-gradient(135deg, rgba(87, 193, 239, 0.24), rgba(235, 108, 163, 0.24));
     color: var(--text-main); border: 1px solid rgba(130, 175, 235, 0.45);
   }
+  .b-mint {
+    background: linear-gradient(135deg, rgba(110, 231, 183, 0.25), rgba(87, 193, 239, 0.22));
+    color: var(--soft-mint); border: 1px solid rgba(110, 231, 183, 0.55);
+  }
   .b-soft { background: rgba(148, 163, 184, 0.12); color: var(--text-main); border: 1px solid var(--border-soft); }
   .b-soft.active-filter {
     background: var(--logo-cyan-bg); color: var(--logo-cyan); border-color: var(--border-cyan);
@@ -547,14 +551,14 @@
     text-transform: uppercase;
   }
 
-  /* POPUP AVA FULL-BODY DARI TABEL */
+  /* POPUP AVA FULL-BODY DARI TABEL + ADD FRIEND */
   .fb-popup-card {
     background: var(--bg-card);
     border: 1.5px solid var(--border-cyan);
     border-radius: 16px;
     padding: 16px;
     width: 100%;
-    max-width: 310px;
+    max-width: 330px;
     box-shadow: 0 22px 48px rgba(0, 0, 0, 0.65);
     animation: modalPopIn 0.24s cubic-bezier(0.34, 1.56, 0.64, 1);
     text-align: center;
@@ -567,7 +571,7 @@
   .fb-popup-sub { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
   .fb-popup-stage {
     width: 100%;
-    height: 310px;
+    height: 300px;
     border-radius: 12px;
     background: linear-gradient(180deg, #f5f8fc 0%, #e7eef7 100%);
     border: 1.5px solid var(--border-pink);
@@ -580,7 +584,19 @@
   }
   .fb-popup-footer {
     margin-top: 12px;
-    display: flex; gap: 6px; justify-content: center;
+    display: flex; gap: 6px; justify-content: center; flex-wrap: wrap;
+  }
+  .fb-add-btn {
+    flex: 1 1 100%;
+    padding: 8px 12px;
+    font-size: 12px;
+    font-weight: 800;
+    border-radius: 9px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    letter-spacing: 0.2px;
   }
 
   .form-group { margin-bottom: 9px; }
@@ -718,7 +734,7 @@
   </div>
 </div>
 
-<!-- POPUP AVA FULL-BODY SAAT FOTO AVA DI DAFTAR DIKLIK -->
+<!-- POPUP AVA FULL-BODY + ADD FRIEND ROBLOX -->
 <div class="modal" id="fullBodyModal" onclick="if(event.target===this) closeFullBodyModal()">
   <div class="fb-popup-card">
     <div class="fb-popup-top">
@@ -730,8 +746,9 @@
     </div>
     <div class="fb-popup-stage" id="fbPopupStage">?</div>
     <div class="fb-popup-footer">
-      <button type="button" class="b-cyan" id="fbEditBtn" style="padding:5px 12px;">Edit Kursi</button>
-      <button type="button" class="b-soft" style="padding:5px 12px;" onclick="closeFullBodyModal()">Selesai</button>
+      <button type="button" class="b-mint fb-add-btn" id="fbAddFriendBtn" onclick="openRobloxAddFriend()">+ Add Friend di Roblox</button>
+      <button type="button" class="b-cyan" id="fbEditBtn" style="flex:1;padding:6px 10px;">Edit Kursi</button>
+      <button type="button" class="b-soft" style="flex:1;padding:6px 10px;" onclick="closeFullBodyModal()">Selesai</button>
     </div>
   </div>
 </div>
@@ -750,6 +767,7 @@
   var robloxCache = {};
   var currentModalFullBody = '';
   var currentModalHeadshot = '';
+  var currentModalUserId = '';
   var manualDisplayOverride = false;
   var lookupTimer = null;
 
@@ -803,7 +821,7 @@
 
   function playButtonTone(kind) {
     if (!soundEnabled) return;
-    if (kind === 'cyan') {
+    if (kind === 'cyan' || kind === 'mint') {
       playTone(659.25, 0, 0.065, 'triangle', 0.08);
       playTone(880.00, 0.045, 0.08, 'triangle', 0.075);
     } else if (kind === 'pink') {
@@ -824,6 +842,7 @@
     if (!btn || btn.disabled) return;
     if (btn.id === 'soundBtn') return;
     if (btn.classList.contains('b-cyan')) playButtonTone('cyan');
+    else if (btn.classList.contains('b-mint')) playButtonTone('mint');
     else if (btn.classList.contains('b-pink')) playButtonTone('pink');
     else if (btn.classList.contains('b-grad')) playButtonTone('grad');
     else playButtonTone('soft');
@@ -1005,6 +1024,7 @@
       tiktok: (prev && prev.tiktok) ? prev.tiktok : '',
       name: (prev && prev.name) ? prev.name : '',
       displayName: (prev && prev.displayName) ? prev.displayName : '',
+      userId: (prev && prev.userId) ? prev.userId : '',
       avatarUrl: (prev && prev.avatarUrl) ? prev.avatarUrl : '',
       fullBodyUrl: (prev && prev.fullBodyUrl) ? prev.fullBodyUrl : '',
       val: hasPrevData ? Number(prev.val || cfg.htm) : 0,
@@ -1034,7 +1054,7 @@
   function renderAvatarBox(url, fallbackText, seatIdx) {
     var div = document.createElement('div');
     div.className = 'ava-box clickable-ava';
-    div.title = 'Klik untuk lihat Ava Full-Body';
+    div.title = 'Klik untuk lihat Ava Full-Body & Add Friend';
     div.setAttribute('onclick', 'openFullBodyPopup(' + seatIdx + ')');
     if (url) {
       var img = document.createElement('img');
@@ -1059,13 +1079,27 @@
     var cached = st.name ? robloxCache[st.name.toLowerCase()] : null;
     var fbUrl = st.fullBodyUrl || (cached && (cached.fullBodyUrl || cached.avatarUrl)) || st.avatarUrl || '';
     var headUrl = st.avatarUrl || (cached && cached.avatarUrl) || '';
+    var rblxId = st.userId || (cached && cached.userId) || '';
     var who = st.displayName || st.name || st.tiktok || 'Peserta';
     var initChar = initialChar(st.name || st.displayName || st.tiktok);
 
     document.getElementById('fbPopupTitle').innerText = 'Kursi #' + st.id + ' • ' + who;
     document.getElementById('fbPopupSub').innerText = st.name
-      ? ('Roblox: @' + st.name + (st.tiktok ? ' • TT: ' + st.tiktok : ''))
+      ? ('Roblox: @' + st.name + (rblxId ? ' (ID: ' + rblxId + ')' : '') + (st.tiktok ? ' • TT: ' + st.tiktok : ''))
       : (st.tiktok ? ('TikTok: ' + st.tiktok) : 'Full-Body Avatar');
+
+    var addBtn = document.getElementById('fbAddFriendBtn');
+    if (addBtn) {
+      if (rblxId || st.name || st.displayName) {
+        addBtn.disabled = false;
+        addBtn.innerText = rblxId
+          ? '+ Add Friend (@' + (st.name || who) + ')'
+          : '+ Cari & Add di Roblox';
+      } else {
+        addBtn.disabled = true;
+        addBtn.innerText = '+ Add Friend (Isi Username Roblox dulu)';
+      }
+    }
 
     var stage = document.getElementById('fbPopupStage');
     stage.innerHTML = '';
@@ -1094,6 +1128,26 @@
     };
 
     document.getElementById('fullBodyModal').className = 'modal active';
+  }
+
+  function openRobloxAddFriend() {
+    if (fullBodySeatIndex === null) return;
+    var st = seats[fullBodySeatIndex];
+    if (!st) return;
+
+    var cached = st.name ? robloxCache[st.name.toLowerCase()] : null;
+    var rblxId = st.userId || (cached && cached.userId) || '';
+    var queryName = (st.name || st.displayName || '').trim();
+
+    if (rblxId) {
+      var profileUrl = 'https://www.roblox.com/users/' + encodeURIComponent(rblxId) + '/profile';
+      window.open(profileUrl, '_blank', 'noopener,noreferrer');
+      setInfo('Membuka profil Roblox #' + st.id + ' untuk Add Friend...');
+    } else if (queryName) {
+      var searchUrl = 'https://www.roblox.com/search/users?keyword=' + encodeURIComponent(queryName);
+      window.open(searchUrl, '_blank', 'noopener,noreferrer');
+      setInfo('Mencari ' + queryName + ' di Roblox...');
+    }
   }
 
   function closeFullBodyModal() {
@@ -1303,6 +1357,7 @@
   function applyFoundRobloxProfile(key, uname, info) {
     var prev = robloxCache[key] || {};
     var merged = {
+      userId: info.userId || prev.userId || '',
       displayName: info.displayName || prev.displayName || '',
       avatarUrl: info.avatarUrl || prev.avatarUrl || '',
       fullBodyUrl: info.fullBodyUrl || prev.fullBodyUrl || info.avatarUrl || ''
@@ -1311,6 +1366,7 @@
 
     if (document.getElementById('bidderInput').value.trim().toLowerCase() !== key) return;
 
+    currentModalUserId = merged.userId;
     if (!manualDisplayOverride && merged.displayName) {
       document.getElementById('displayInput').value = merged.displayName;
     }
@@ -1328,6 +1384,7 @@
     var fallbackInit = uname || document.getElementById('tiktokInput').value.trim();
 
     if (!uname) {
+      currentModalUserId = '';
       updateModalFullBody('', '', fallbackInit);
       stEl.innerText = 'Isi Nama TikTok & Username Roblox';
       return;
@@ -1339,6 +1396,7 @@
       return;
     }
 
+    currentModalUserId = '';
     updateModalFullBody('', '', fallbackInit);
     stEl.innerText = 'Mencari Display & Full-Body...';
 
@@ -1352,6 +1410,7 @@
       .then(function(data) {
         if (data && data.ok) {
           applyFoundRobloxProfile(key, uname, {
+            userId: data.userId || '',
             displayName: data.displayName || '',
             avatarUrl: data.avatarUrl || '',
             fullBodyUrl: data.fullBodyUrl || data.fullBodyAvatarUrl || data.avatarUrl || ''
@@ -1379,6 +1438,7 @@
     manualDisplayOverride = false;
     currentModalFullBody = '';
     currentModalHeadshot = '';
+    currentModalUserId = '';
     updateModalFullBody('', '', val || document.getElementById('tiktokInput').value);
     clearTimeout(lookupTimer);
     lookupTimer = setTimeout(function() {
@@ -1406,6 +1466,7 @@
     var cached = seat.name ? robloxCache[seat.name.toLowerCase()] : null;
     var fbUrl = seat.fullBodyUrl || (cached && (cached.fullBodyUrl || cached.avatarUrl)) || seat.avatarUrl || '';
     var headUrl = seat.avatarUrl || (cached && cached.avatarUrl) || '';
+    currentModalUserId = seat.userId || (cached && cached.userId) || '';
 
     updateModalFullBody(fbUrl, headUrl, seat.name || seat.displayName || seat.tiktok || '');
     document.getElementById('avaStatus').innerText = seat.name
@@ -1423,6 +1484,7 @@
     activeSeatIndex = null;
     currentModalFullBody = '';
     currentModalHeadshot = '';
+    currentModalUserId = '';
     manualDisplayOverride = false;
   }
 
@@ -1453,12 +1515,14 @@
     } else {
       var cached = name ? robloxCache[name.toLowerCase()] : null;
       var finalDisp = disp || (cached && cached.displayName) || '';
+      var finalUserId = currentModalUserId || (cached && cached.userId) || '';
       var finalAva = (cached && cached.avatarUrl) || currentModalHeadshot || currentModalFullBody || '';
       var finalFullBody = currentModalFullBody || (cached && (cached.fullBodyUrl || cached.avatarUrl)) || finalAva || '';
 
       seats[idx].tiktok = tt;
       seats[idx].name = name;
       seats[idx].displayName = finalDisp;
+      seats[idx].userId = finalUserId;
       seats[idx].avatarUrl = finalAva;
       seats[idx].fullBodyUrl = finalFullBody;
       seats[idx].val = val;
